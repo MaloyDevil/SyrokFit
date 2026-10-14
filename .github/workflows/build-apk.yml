@@ -1,0 +1,42 @@
+name: Build SyrokFit APK
+
+on:
+  push:
+    branches: [ "main", "master" ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Скачивание кода репозитория
+        uses: actions/checkout@v4
+
+      - name: Установка Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Установка Java 17 (для Android Gradle)
+        uses: actions/setup-java@v4
+        with:
+          distribution: "temurin"
+          java-version: "17"
+
+      - name: Установка Flutter SDK
+        uses: subosito/flutter-action@v2
+        with:
+          channel: "stable"
+
+      - name: Установка Flet и сборка APK
+        run: |
+          pip install --upgrade pip
+          pip install "flet[all]"
+          flet build apk --project "SyrokFit" --org "com.syrok.fit" --yes
+
+      - name: Выгрузка готового APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: SyrokFit-APK
+          path: build/apk/*.apk
